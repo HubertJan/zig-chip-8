@@ -1,22 +1,26 @@
 const std = @import("std");
 
-const Register = struct {
+pub const Register = struct {
     content: u8,
 };
 
-const Stack = struct { content: [16]u16 };
+pub const ProgramCounter = struct {};
 
-const MemoryAddress = struct { content: [3]u8 };
+pub const Display = struct {};
 
-const Instruction = struct {
-    content: [4]u8,
+pub const Stack = struct { content: [16]u16 };
 
-    pub fn build(content: [4]u8) Instruction {
+pub const MemoryAddress = struct { content: u12 };
+
+pub const Instruction = struct {
+    content: u16,
+
+    pub fn build(content: u16) Instruction {
         return Instruction{ .content = content };
     }
 };
 
-const Chip8Opcode = enum {
+pub const Chip8Opcode = enum {
     clearScreen,
     jump,
     subroutine,
@@ -26,30 +30,37 @@ const Chip8Opcode = enum {
     skipIfEqualRegisters,
     skipIfUnequalReigsters,
     set,
-    add,
+    addToRegister,
     display,
     setIndexRegister,
 };
 
-const RegisterAddress = struct {};
+pub const RegisterAddress = struct {
+    content: u4,
+};
 
-const RegisterAndMemoryAddress = struct {
+pub const RegisterAndMemoryAddress = struct {
     registerAddress: RegisterAddress,
     memoryAddress: MemoryAddress,
 };
 
-const TwoRegisterAddresses = struct {
+pub const TwoRegisterAddresses = struct {
     oneAddress: RegisterAddress,
     anotherAddress: RegisterAddress,
 };
 
-const DisplayOperands = struct {
+pub const DisplayOperands = struct {
     pixelsToDraw: u8,
     xPosition: RegisterAddress,
-    yPositiom: RegisterAddress,
+    yPosition: RegisterAddress,
 };
 
-const Chip8Instruction = union(Chip8Opcode) {
+pub const RegisterAndValue = struct {
+    address: RegisterAddress,
+    value: u8,
+};
+
+pub const Chip8Instruction = union(Chip8Opcode) {
     clearScreen: void,
     jump: MemoryAddress,
     subroutine: MemoryAddress,
@@ -58,17 +69,8 @@ const Chip8Instruction = union(Chip8Opcode) {
     skipIfUnequal: RegisterAndMemoryAddress,
     skipIfEqualRegisters: TwoRegisterAddresses,
     skipIfUnequalReigsters: TwoRegisterAddresses,
-    set: RegisterAndMemoryAddress,
-    add: TwoRegisterAddresses,
+    set: RegisterAndValue,
+    addToRegister: RegisterAndValue,
     display: DisplayOperands,
-    setIndexRegister: u24,
+    setIndexRegister: u12,
 };
-
-fn encodeInstruction(instruction: Instruction) Chip8Instruction {
-    _ = instruction;
-}
-
-test "test instructions" {
-    const inst = Chip8Instruction.clearScreen;
-    _ = inst;
-}
