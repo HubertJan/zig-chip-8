@@ -17,6 +17,51 @@ fn checkByOpcodeMask(
     return filtered == opcode_nulled;
 }
 
+fn decodeFirstRegisterNumber(instruction: Instruction) u4 {
+    return @as(
+        u4,
+        @truncate(
+            instruction.content >> 8,
+        ),
+    );
+}
+
+fn decodeSecondRegisterNumber(instruction: Instruction) u4 {
+    return @as(
+        u4,
+        @truncate(
+            instruction.content >> 4,
+        ),
+    );
+}
+
+fn decode12BitValue(instruction: Instruction) u12 {
+    return @as(
+        u12,
+        @truncate(
+            instruction.content,
+        ),
+    );
+}
+
+fn decode8BitValue(instruction: Instruction) u8 {
+    return @as(
+        u8,
+        @truncate(
+            instruction.content,
+        ),
+    );
+}
+
+fn decode4BitValue(instruction: Instruction) u4 {
+    return @as(
+        u4,
+        @truncate(
+            instruction.content,
+        ),
+    );
+}
+
 fn decodeClearScreen(instruction: Instruction) ?Chip8Instruction {
     if (checkByOpcodeMask(
         instruction,
@@ -45,12 +90,7 @@ fn decodeJump(instruction: Instruction) ?Chip8Instruction {
     )) {
         return null;
     }
-    const address = @as(
-        u12,
-        @truncate(
-            instruction.content,
-        ),
-    );
+    const address = decode12BitValue(instruction);
     return Chip8Instruction{ .jump = MemoryAddress{
         .content = address,
     } };
@@ -65,7 +105,7 @@ test "test decode Jump" {
     );
 }
 
-fn decodeSet(instruction: Instruction) ?Chip8Instruction {
+fn decodeSetRegisterToValue(instruction: Instruction) ?Chip8Instruction {
     if (!checkByOpcodeMask(
         instruction,
         0x6000,
@@ -73,18 +113,8 @@ fn decodeSet(instruction: Instruction) ?Chip8Instruction {
     )) {
         return null;
     }
-    const registerAddressNum = @as(
-        u4,
-        @truncate(
-            instruction.content >> 8,
-        ),
-    );
-    const value = @as(
-        u8,
-        @truncate(
-            instruction.content,
-        ),
-    );
+    const registerAddressNum = decodeFirstRegisterNumber(instruction);
+    const value = decode8BitValue(instruction);
     return Chip8Instruction{ .set = processor.RegisterAndValue{
         .address = processor.RegisterAddress{
             .content = registerAddressNum,
@@ -101,18 +131,9 @@ fn decodeAddToRegister(instruction: Instruction) ?Chip8Instruction {
     )) {
         return null;
     }
-    const registerAddressNum = @as(
-        u4,
-        @truncate(
-            instruction.content >> 8,
-        ),
-    );
-    const value = @as(
-        u8,
-        @truncate(
-            instruction.content,
-        ),
-    );
+    const registerAddressNum = decodeFirstRegisterNumber(instruction);
+    const value = decode8BitValue(instruction);
+
     return Chip8Instruction{ .addToRegister = processor.RegisterAndValue{
         .address = processor.RegisterAddress{
             .content = registerAddressNum,
@@ -139,12 +160,7 @@ fn decodeSetIndexRegister(instruction: Instruction) ?Chip8Instruction {
     )) {
         return null;
     }
-    const value = @as(
-        u12,
-        @truncate(
-            instruction.content,
-        ),
-    );
+    const value = decode12BitValue(instruction);
     return Chip8Instruction{ .setIndexRegister = value };
 }
 
@@ -166,25 +182,10 @@ fn decodeDisplay(instruction: Instruction) ?Chip8Instruction {
         return null;
     }
 
-    const registerAddressX = @as(
-        u4,
-        @truncate(
-            instruction.content >> 8,
-        ),
-    );
+    const registerAddressX = decodeFirstRegisterNumber(instruction);
+    const registerAddressY = decodeSecondRegisterNumber(instruction);
+    const pixelsToDraw = decode4BitValue(instruction);
 
-    const registerAddressY = @as(
-        u4,
-        @truncate(
-            instruction.content >> 4,
-        ),
-    );
-    const pixelsToDraw = @as(
-        u4,
-        @truncate(
-            instruction.content,
-        ),
-    );
     return Chip8Instruction{ .display = processor.DisplayOperands{
         .pixelsToDraw = pixelsToDraw,
         .xPosition = processor.RegisterAddress{ .content = registerAddressX },
@@ -192,7 +193,7 @@ fn decodeDisplay(instruction: Instruction) ?Chip8Instruction {
     } };
 }
 
-test "test decode display" {
+test "decode display" {
     const clearScreenInstruction = Instruction.build(0xD123);
     const result = decodeInstruction(clearScreenInstruction);
     const instruction = result.?;
@@ -206,13 +207,33 @@ test "test decode display" {
 const decoderFunctions = [_]decoder_op{
     decodeClearScreen,
     decodeJump,
-    decodeSet,
+    decodeSetRegisterRegister,
     decodeAddToRegister,
     decodeSetIndexRegister,
     decodeDisplay,
 };
 
-fn decodeInstruction(instruction: Instruction) ?Chip8Instruction {
+fn decodeSetRegisterRegister(instruction: Instruction) ?Chip8Instruction {
+    if (!checkByOpcodeMask(
+        instruction,
+        0x8000,
+        0xF00F,
+    )) {
+        return null;
+    }
+    const registerAddressNum = decodeFirstRegisterNumber(instruction);
+    const otherRegisterAddressNum = decodeSecondRegisterNumber(instruction);
+    return Chip8Instruction{ .set = processor.TwoRegisterAddresses{
+        .oneAddress = processor.RegisterAddress{
+            .content = registerAddressNum,
+        },
+        .anotherAddress = processor.RegisterAddress{
+            .content = otherRegisterAddressNum,
+        },
+    } };
+}
+
+pub fn decodeInstruction(instruction: Instruction) ?Chip8Instruction {
     for (decoderFunctions) |decode| {
         const result = decode(instruction);
         if (result != null) {
