@@ -1,4 +1,6 @@
 const std = @import("std");
+const Decode = @import("decode.zig");
+const Execute = @import("execute.zig");
 const assert = std.debug.assert;
 const Allocator = std.mem.Allocator;
 
@@ -6,13 +8,6 @@ pub const VariableRegister = struct {
     content: u8,
     pub fn init() VariableRegister {
         return VariableRegister{ .content = 0 };
-    }
-};
-
-pub const ProgramCounter = struct {
-    content: u16,
-    pub fn init() ProgramCounter {
-        return ProgramCounter{ .content = 0 };
     }
 };
 
@@ -33,7 +28,8 @@ pub const Display = struct {
     }
 
     pub fn drawPixel(self: Display, x: u8, y: u8, value: bool) void {
-        self.content[x + y * 64] = value;
+        const index: usize = @as(usize, x) + @as(usize, y) * 64;
+        self.content[index] = value;
     }
 
     pub fn getPixel(self: Display, x: u8, y: u8) bool {
@@ -92,6 +88,7 @@ pub const Chip8Opcode = enum {
     skipIfEqualRegisters,
     skipIfUnequalReigsters,
     set,
+    setToRegister,
     addToRegister,
     display,
     setIndexRegister,
@@ -132,6 +129,7 @@ pub const Chip8Instruction = union(Chip8Opcode) {
     skipIfEqualRegisters: TwoRegisterAddresses,
     skipIfUnequalReigsters: TwoRegisterAddresses,
     set: RegisterAndValue,
+    setToRegister: TwoRegisterAddresses,
     addToRegister: RegisterAndValue,
     display: DisplayOperands,
     setIndexRegister: u12,
@@ -142,7 +140,7 @@ pub const Chip80Processor = struct {
     indexRegister: u16,
     memory: []u8,
     stack: Stack,
-    programCounter: ProgramCounter,
+    programCounter: MemoryAddress,
     display: Display,
 
     pub fn init(allocator: Allocator) !Chip80Processor {
@@ -159,7 +157,7 @@ pub const Chip80Processor = struct {
         return Chip80Processor{
             .registers = registers,
             .stack = Stack.init(),
-            .programCounter = ProgramCounter.init(),
+            .programCounter = MemoryAddress{ .content = 512 },
             .display = try Display.init(allocator),
             .memory = memory,
             .indexRegister = 0,
@@ -169,6 +167,12 @@ pub const Chip80Processor = struct {
         const allocator = self.allocator;
         allocator.free(self.registers);
         allocator.free(self.memory);
+    }
+
+    pub fn loadProgram(self: Chip80Processor, program: []u8) void {
+        for (0..program.len) |i| {
+            self.memory[i + 512] = program[i];
+        }
     }
 
     pub fn readIndexedMemory(self: Chip80Processor, offset: u16) u8 {
@@ -191,5 +195,16 @@ pub const Chip80Processor = struct {
         _ = value;
         const v = if (true) 1 else 0;
         self.registers[0xF].content = v;
+    }
+
+    pub fn cycle(self: *Chip80Processor) void {
+        const instructionAddress = self.programCounter;
+        const firstHalfinstruction = @as(u16, self.readMemory(instructionAddress)) << 8;
+        const secondHalfinstruction = @as(u16, self.readMemory(MemoryAddress{ .content = instructionAddress.content + 1 }));
+        const instruction = Instruction{ .content = firstHalfinstruction + secondHalfinstruction };
+        std.debug.print("0x{x:0>4}\n", .{instruction.content});
+        const opcode = Decode.decodeInstruction(instruction);
+        self.programCounter = MemoryAddress{ .content = instructionAddress.content + 2 };
+        Execute.executeInstruction(opcode.?, self);
     }
 };

@@ -208,6 +208,7 @@ const decoderFunctions = [_]decoder_op{
     decodeClearScreen,
     decodeJump,
     decodeSetRegisterRegister,
+    decodeSetRegisterToValue,
     decodeAddToRegister,
     decodeSetIndexRegister,
     decodeDisplay,
@@ -223,7 +224,7 @@ fn decodeSetRegisterRegister(instruction: Instruction) ?Chip8Instruction {
     }
     const registerAddressNum = decodeFirstRegisterNumber(instruction);
     const otherRegisterAddressNum = decodeSecondRegisterNumber(instruction);
-    return Chip8Instruction{ .set = processor.TwoRegisterAddresses{
+    return Chip8Instruction{ .setToRegister = processor.TwoRegisterAddresses{
         .oneAddress = processor.RegisterAddress{
             .content = registerAddressNum,
         },

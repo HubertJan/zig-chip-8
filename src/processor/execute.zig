@@ -11,7 +11,7 @@ fn isBitSet(pixelsToDraw: u8, xOffset: u3) bool {
     return ((pixelsToDraw >> (7 - xOffset)) & 1) == 1;
 }
 
-fn drawPixels(processor: *Chip80Processor, startX: u8, startY: u8, spriteByteAmount: u8) void {
+fn drawPixels(processor: *const Chip80Processor, startX: u8, startY: u8, spriteByteAmount: u8) void {
     for (0..spriteByteAmount) |spriteByteIndex| {
         const pixelsToDraw = processor.readIndexedMemory(@intCast(spriteByteIndex));
         const yPixelPos: u8 = startY + @as(u8, @intCast(spriteByteIndex));
@@ -38,7 +38,7 @@ fn drawPixels(processor: *Chip80Processor, startX: u8, startY: u8, spriteByteAmo
     }
 }
 
-fn executeInstruction(instruction: Chip8Instruction, processor: *Chip80Processor) void {
+pub fn executeInstruction(instruction: Chip8Instruction, processor: *Chip80Processor) void {
     switch (instruction) {
         .addToRegister => |data| {
             processor.registers[data.address.content].content += data.value;
@@ -54,7 +54,7 @@ fn executeInstruction(instruction: Chip8Instruction, processor: *Chip80Processor
             drawPixels(processor, startX, startY, pixelAmountToDraw);
         },
         .jump => |data| {
-            processor.programCounter.content = data.content;
+            processor.programCounter = chip80processor.MemoryAddress{ .content = data.content };
         },
         .set => |data| {
             processor.registers[data.address.content].content = data.value;
@@ -63,25 +63,25 @@ fn executeInstruction(instruction: Chip8Instruction, processor: *Chip80Processor
             processor.indexRegister = data;
         },
         .skipIfEqual => |data| {
-            const is_equal = processor.readMemory(data.memoryAddress).content == processor.readVariableRegister(data.registerAddress).content;
+            const is_equal = processor.readMemory(data.memoryAddress) == processor.readVariableRegister(data.registerAddress);
             if (is_equal) {
                 processor.programCounter.content += 2;
             }
         },
         .skipIfEqualRegisters => |data| {
-            const is_equal = processor.readVariableRegister(data).content == processor.readVariableRegister(data.registerAddress).content;
+            const is_equal = processor.readVariableRegister(data.oneAddress) == processor.readVariableRegister(data.anotherAddress);
             if (is_equal) {
                 processor.programCounter.content += 2;
             }
         },
         .skipIfUnequal => |data| {
-            const is_equal = processor.readMemory(data.memoryAddress).content == processor.readVariableRegister(data.registerAddress).content;
+            const is_equal = processor.readMemory(data.memoryAddress) == processor.readVariableRegister(data.registerAddress);
             if (!is_equal) {
                 processor.programCounter.content += 2;
             }
         },
         .skipIfUnequalReigsters => |data| {
-            const is_equal = processor.readVariableRegister(data).content == processor.readVariableRegister(data.registerAddress).content;
+            const is_equal = processor.readVariableRegister(data.oneAddress) == processor.readVariableRegister(data.anotherAddress);
             if (!is_equal) {
                 processor.programCounter.content += 2;
             }
@@ -93,8 +93,9 @@ fn executeInstruction(instruction: Chip8Instruction, processor: *Chip80Processor
         },
         .ret => {
             processor.stack.stackPointer -= 1;
-            processor.programCounter.content = processor.stack.content[processor.stack.stackPointer];
+            processor.programCounter = chip80processor.MemoryAddress{ .content = @as(u12, @intCast(processor.stack.content[processor.stack.stackPointer])) };
         },
+        .setToRegister => {},
     }
 }
 
