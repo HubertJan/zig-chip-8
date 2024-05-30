@@ -71,6 +71,17 @@ pub const WindowDisplay = struct {
         }
     }
 
+    pub fn hasReceivedQuitEvent(_: WindowDisplay) bool {
+        var event: c.SDL_Event = undefined;
+        if (c.SDL_PollEvent(&event) != 0) {
+            switch (event.type) {
+                c.SDL_QUIT => return true,
+                else => return false,
+            }
+        }
+        return false;
+    }
+
     pub fn loop(_: WindowDisplay) void {
         var quit = false;
         while (!quit) {
