@@ -142,6 +142,7 @@ pub const Chip80Processor = struct {
     stack: Stack,
     programCounter: MemoryAddress,
     display: Display,
+    allocator: Allocator,
 
     pub fn init(allocator: Allocator) !Chip80Processor {
         const registers = try allocator.alloc(VariableRegister, 16);
@@ -161,9 +162,10 @@ pub const Chip80Processor = struct {
             .display = try Display.init(allocator),
             .memory = memory,
             .indexRegister = 0,
+            .allocator = allocator,
         };
     }
-    fn deinit(self: Chip80Processor) void {
+    pub fn deinit(self: Chip80Processor) void {
         const allocator = self.allocator;
         allocator.free(self.registers);
         allocator.free(self.memory);

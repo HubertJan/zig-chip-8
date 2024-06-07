@@ -2,8 +2,8 @@ const c = @cImport({
     @cInclude("SDL2/SDL.h");
 });
 
-const window_width = 400;
-const window_height = 140;
+const window_width = 640;
+const window_height = 320;
 
 pub const SDLError = error{
     UnableToInitializeSDL,
