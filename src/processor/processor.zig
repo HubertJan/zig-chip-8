@@ -204,7 +204,6 @@ pub const Chip80Processor = struct {
         const firstHalfinstruction = @as(u16, self.readMemory(instructionAddress)) << 8;
         const secondHalfinstruction = @as(u16, self.readMemory(MemoryAddress{ .content = instructionAddress.content + 1 }));
         const instruction = Instruction{ .content = firstHalfinstruction + secondHalfinstruction };
-        std.debug.print("0x{x:0>4}\n", .{instruction.content});
         const opcode = Decode.decodeInstruction(instruction);
         self.programCounter = MemoryAddress{ .content = instructionAddress.content + 2 };
         Execute.executeInstruction(opcode.?, self);
