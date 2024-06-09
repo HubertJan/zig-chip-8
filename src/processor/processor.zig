@@ -139,6 +139,7 @@ pub const Chip80Processor = struct {
     registers: []VariableRegister,
     indexRegister: u16,
     memory: []u8,
+    keyPadKeys: []u8,
     stack: Stack,
     programCounter: MemoryAddress,
     display: Display,
@@ -153,6 +154,10 @@ pub const Chip80Processor = struct {
         for (0..4096) |i| {
             memory[i] = 0;
         }
+        const keyPadKeys = try allocator.alloc(u8, 16);
+        for (0..16) |i| {
+            keyPadKeys[i] = 0;
+        }
         memory[0] = 0xFF;
         memory[1] = 0xF0;
         return Chip80Processor{
@@ -163,6 +168,7 @@ pub const Chip80Processor = struct {
             .memory = memory,
             .indexRegister = 0,
             .allocator = allocator,
+            .keyPadKeys = keyPadKeys,
         };
     }
     pub fn deinit(self: Chip80Processor) void {

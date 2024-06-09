@@ -25,6 +25,66 @@ pub const DrawPoint = struct {
     y: u32,
 };
 
+pub const EventType = enum { nothing, quit, keyUp, keyDown };
+
+pub const Event = union(EventType) {
+    nothing: void,
+    quit: void,
+    keyUp: u8,
+    keyDown: u8,
+};
+
+const keymap: [16]c_int = [_]c_int{
+    c.SDL_SCANCODE_X,
+    c.SDL_SCANCODE_1,
+    c.SDL_SCANCODE_2,
+    c.SDL_SCANCODE_3,
+    c.SDL_SCANCODE_Q,
+    c.SDL_SCANCODE_W,
+    c.SDL_SCANCODE_E,
+    c.SDL_SCANCODE_A,
+    c.SDL_SCANCODE_S,
+    c.SDL_SCANCODE_D,
+    c.SDL_SCANCODE_Z,
+    c.SDL_SCANCODE_C,
+    c.SDL_SCANCODE_4,
+    c.SDL_SCANCODE_R,
+    c.SDL_SCANCODE_F,
+    c.SDL_SCANCODE_V,
+};
+
+pub fn pollLatestEvent() Event {
+    var event: c.SDL_Event = undefined;
+    if (c.SDL_PollEvent(&event) != 0) {
+        switch (event.type) {
+            c.SDL_QUIT => return Event.quit,
+            c.SDL_KEYDOWN => {
+                if (event.key.keysym.scancode == c.SDL_SCANCODE_ESCAPE) {
+                    return Event.quit;
+                }
+                var i: u8 = 0;
+                while (i < 16) : (i += 1) {
+                    if (event.key.keysym.scancode == keymap[i]) {
+                        return Event{ .keyDown = i };
+                    }
+                }
+            },
+            c.SDL_KEYUP => {
+                var i: u8 = 0;
+                while (i < 16) : (i += 1) {
+                    if (event.key.keysym.scancode == keymap[i]) {
+                        return Event{ .keyUp = i };
+                    }
+                }
+            },
+            else => {
+                return Event.nothing;
+            },
+        }
+    }
+    return Event.nothing;
+}
+
 pub const WindowDisplay = struct {
     window: *c.SDL_Window,
     renderer: *c.SDL_Renderer,
@@ -42,7 +102,6 @@ pub const WindowDisplay = struct {
             c.SDL_Log("Unable to create window and renderer: %s", c.SDL_GetError());
             return SDLError.UnableToInitializeSDL;
         }
-
         c.SDL_RenderPresent(renderer);
         return WindowDisplay{ .window = window.?, .renderer = renderer.? };
     }
@@ -82,23 +141,11 @@ pub const WindowDisplay = struct {
         return false;
     }
 
-    pub fn loop(_: WindowDisplay) void {
-        var quit = false;
-        while (!quit) {
-            var event: c.SDL_Event = undefined;
-            while (c.SDL_PollEvent(&event) != 0) {
-                switch (event.type) {
-                    c.SDL_QUIT => {
-                        quit = true;
-                    },
-                    else => {},
-                }
-            }
-            c.SDL_Delay(17);
-        }
-    }
-
     pub fn update(self: WindowDisplay) void {
         c.SDL_RenderPresent(self.renderer);
+    }
+
+    pub fn nonGUIBlockingWait(_: WindowDisplay, delay: u32) void {
+        c.SDL_Delay(delay);
     }
 };

@@ -7,8 +7,8 @@ const Chip8Instruction = chip80processor.Chip8Instruction;
 const Chip80Processor = chip80processor.Chip80Processor;
 const Instruction = chip80processor.Instruction;
 
-fn isBitSet(pixelsToDraw: u8, xOffset: u3) bool {
-    return ((pixelsToDraw >> (7 - xOffset)) & 1) == 1;
+fn isBitSet(bit: u8, bitIndex: u3) bool {
+    return ((bit >> (7 - bitIndex)) & 1) == 1;
 }
 
 fn drawPixels(processor: *const Chip80Processor, startX: u8, startY: u8, spriteByteAmount: u8) void {

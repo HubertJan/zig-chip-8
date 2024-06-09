@@ -35,6 +35,8 @@ fn renderCurrentDisplay(display: *const chip80processor.Display, window: *const 
     window.update();
 }
 
+const delayInMicroSecondsBetweenCycles = 300;
+
 pub fn emulateRom(rom: []u8) !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
@@ -44,12 +46,34 @@ pub fn emulateRom(rom: []u8) !void {
     defer processor.deinit();
     processor.loadProgram(rom);
     const display = try SDLScreen.WindowDisplay.init();
-    while (true) {
-        processor.cycle();
+    var isRunning = true;
+    var lastCycleTime = std.time.microTimestamp();
+    while (isRunning) {
+        const currentTime = std.time.microTimestamp();
+        if (currentTime - lastCycleTime >= delayInMicroSecondsBetweenCycles) {
+            processor.cycle();
+            lastCycleTime = currentTime;
+        }
+
         try renderCurrentDisplay(&processor.display, &display);
+        var event = SDLScreen.pollLatestEvent();
+        while (event != SDLScreen.Event.nothing) : (event = SDLScreen.pollLatestEvent()) {
+            switch (event) {
+                SDLScreen.Event.keyDown => {
+                    processor.keyPadKeys[event.keyDown] = 1;
+                },
+                SDLScreen.Event.keyUp => {
+                    processor.keyPadKeys[event.keyUp] = 0;
+                },
+                SDLScreen.Event.nothing => {},
+                SDLScreen.Event.quit => {
+                    isRunning = false;
+                    continue;
+                },
+            }
+        }
         if (display.hasReceivedQuitEvent()) {
             break;
         }
-        std.time.sleep(1000 * 1000 * 100);
     }
 }

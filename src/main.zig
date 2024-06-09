@@ -1,6 +1,6 @@
 const std = @import("std");
 const SDLScreen = @import("sdl-renderer/sdl-screen.zig");
-const extractFilePathFromArguments = @import("io/program-arguments.zig").extractFilePathFromArguments;
+const extractFilePathFromArguments = @import("io/user-input.zig").extractFilePathFromArguments;
 const readRomFromFilePath = @import("io/read-rom.zig").readRomFromFilePath;
 const Emulator = @import("emulator/emulator.zig");
 
