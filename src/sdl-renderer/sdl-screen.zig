@@ -144,8 +144,4 @@ pub const WindowDisplay = struct {
     pub fn update(self: WindowDisplay) void {
         c.SDL_RenderPresent(self.renderer);
     }
-
-    pub fn nonGUIBlockingWait(_: WindowDisplay, delay: u32) void {
-        c.SDL_Delay(delay);
-    }
 };
