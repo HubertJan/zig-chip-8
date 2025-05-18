@@ -86,12 +86,18 @@ pub const Chip8Opcode = enum {
     skipIfEqual,
     skipIfUnequal,
     skipIfEqualRegisters,
-    skipIfUnequalReigsters,
+    skipIfUnequalRegisters,
     set,
     setToRegister,
     addToRegister,
     display,
     setIndexRegister,
+    binaryOr,
+    binaryAnd,
+    binaryXor,
+    add,
+    subtract,
+    reversedSubtract,
 };
 
 pub const RegisterAddress = struct {
@@ -127,12 +133,19 @@ pub const Chip8Instruction = union(Chip8Opcode) {
     skipIfEqual: RegisterAndMemoryAddress,
     skipIfUnequal: RegisterAndMemoryAddress,
     skipIfEqualRegisters: TwoRegisterAddresses,
-    skipIfUnequalReigsters: TwoRegisterAddresses,
+    skipIfUnequalRegisters: TwoRegisterAddresses,
     set: RegisterAndValue,
     setToRegister: TwoRegisterAddresses,
     addToRegister: RegisterAndValue,
     display: DisplayOperands,
     setIndexRegister: u12,
+
+    binaryOr: TwoRegisterAddresses,
+    binaryAnd: TwoRegisterAddresses,
+    binaryXor: TwoRegisterAddresses,
+    add: TwoRegisterAddresses,
+    subtract: TwoRegisterAddresses,
+    reversedSubtract: TwoRegisterAddresses,
 };
 
 pub const Chip80Processor = struct {

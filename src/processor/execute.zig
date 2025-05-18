@@ -80,7 +80,7 @@ pub fn executeInstruction(instruction: Chip8Instruction, processor: *Chip80Proce
                 processor.programCounter.content += 2;
             }
         },
-        .skipIfUnequalReigsters => |data| {
+        .skipIfUnequalRegisters => |data| {
             const is_equal = processor.readVariableRegister(data.oneAddress) == processor.readVariableRegister(data.anotherAddress);
             if (!is_equal) {
                 processor.programCounter.content += 2;
