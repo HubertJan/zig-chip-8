@@ -30,146 +30,147 @@ const decodeIfFunctions = [_]decoder_op{
 };
 
 fn decodeIfBinaryOr(instruction: Instruction) ?Chip8Instruction {
-    if (checkByOpcodeMask(
+    if (!checkByOpcodeMask(
         instruction,
         0x8001,
         0xF00F,
     )) {
-        const registerAddressNum = decodeFirstRegisterNumber(instruction);
-        const otherRegisterAddressNum = decodeSecondRegisterNumber(
-            instruction,
-        );
-        return Chip8Instruction{ .binaryOr = processor.TwoRegisterAddresses{
-            .oneAddress = processor.RegisterAddress{
-                .content = registerAddressNum,
-            },
-            .anotherAddress = processor.RegisterAddress{
-                .content = otherRegisterAddressNum,
-            },
-        } };
+        return null;
     }
-    return null;
+    const registerAddressNum = decodeFirstRegisterNumber(instruction);
+    const otherRegisterAddressNum = decodeSecondRegisterNumber(
+        instruction,
+    );
+    return Chip8Instruction{ .binaryOr = processor.TwoRegisterAddresses{
+        .oneAddress = processor.RegisterAddress{
+            .content = registerAddressNum,
+        },
+        .anotherAddress = processor.RegisterAddress{
+            .content = otherRegisterAddressNum,
+        },
+    } };
 }
 
 fn decodeIfBinaryAnd(instruction: Instruction) ?Chip8Instruction {
-    if (checkByOpcodeMask(
+    if (!checkByOpcodeMask(
         instruction,
         0x8001,
         0xF00F,
     )) {
-        const registerAddressNum = decodeFirstRegisterNumber(instruction);
-        const otherRegisterAddressNum = decodeSecondRegisterNumber(
-            instruction,
-        );
-        return Chip8Instruction{ .binaryAnd = processor.TwoRegisterAddresses{
-            .oneAddress = processor.RegisterAddress{
-                .content = registerAddressNum,
-            },
-            .anotherAddress = processor.RegisterAddress{
-                .content = otherRegisterAddressNum,
-            },
-        } };
+        return null;
     }
-    return null;
+    const registerAddressNum = decodeFirstRegisterNumber(instruction);
+    const otherRegisterAddressNum = decodeSecondRegisterNumber(
+        instruction,
+    );
+    return Chip8Instruction{ .binaryAnd = processor.TwoRegisterAddresses{
+        .oneAddress = processor.RegisterAddress{
+            .content = registerAddressNum,
+        },
+        .anotherAddress = processor.RegisterAddress{
+            .content = otherRegisterAddressNum,
+        },
+    } };
 }
 
 fn decodeIfBinaryXor(instruction: Instruction) ?Chip8Instruction {
-    if (checkByOpcodeMask(
+    if (!checkByOpcodeMask(
         instruction,
         0x8003,
         0xF00F,
     )) {
-        const registerAddressNum = decodeFirstRegisterNumber(instruction);
-        const otherRegisterAddressNum = decodeSecondRegisterNumber(
-            instruction,
-        );
-        return Chip8Instruction{ .binaryXor = processor.TwoRegisterAddresses{
-            .oneAddress = processor.RegisterAddress{
-                .content = registerAddressNum,
-            },
-            .anotherAddress = processor.RegisterAddress{
-                .content = otherRegisterAddressNum,
-            },
-        } };
+        return null;
     }
-    return null;
+    const registerAddressNum = decodeFirstRegisterNumber(instruction);
+    const otherRegisterAddressNum = decodeSecondRegisterNumber(
+        instruction,
+    );
+    return Chip8Instruction{ .binaryXor = processor.TwoRegisterAddresses{
+        .oneAddress = processor.RegisterAddress{
+            .content = registerAddressNum,
+        },
+        .anotherAddress = processor.RegisterAddress{
+            .content = otherRegisterAddressNum,
+        },
+    } };
 }
 
 fn decodeIfAdd(instruction: Instruction) ?Chip8Instruction {
-    if (checkByOpcodeMask(
+    if (!checkByOpcodeMask(
         instruction,
         0x8004,
         0xF00F,
     )) {
-        const registerAddressNum = decodeFirstRegisterNumber(instruction);
-        const otherRegisterAddressNum = decodeSecondRegisterNumber(
-            instruction,
-        );
-        return Chip8Instruction{ .add = processor.TwoRegisterAddresses{
-            .oneAddress = processor.RegisterAddress{
-                .content = registerAddressNum,
-            },
-            .anotherAddress = processor.RegisterAddress{
-                .content = otherRegisterAddressNum,
-            },
-        } };
+        return null;
     }
-    return null;
+    const registerAddressNum = decodeFirstRegisterNumber(instruction);
+    const otherRegisterAddressNum = decodeSecondRegisterNumber(
+        instruction,
+    );
+    return Chip8Instruction{ .add = processor.TwoRegisterAddresses{
+        .oneAddress = processor.RegisterAddress{
+            .content = registerAddressNum,
+        },
+        .anotherAddress = processor.RegisterAddress{
+            .content = otherRegisterAddressNum,
+        },
+    } };
 }
 
 fn decodeIfSubtract(instruction: Instruction) ?Chip8Instruction {
-    if (checkByOpcodeMask(
+    if (!checkByOpcodeMask(
         instruction,
         0x8005,
         0xF00F,
     )) {
-        const registerAddressNum = decodeFirstRegisterNumber(instruction);
-        const otherRegisterAddressNum = decodeSecondRegisterNumber(
-            instruction,
-        );
-        return Chip8Instruction{ .subtract = processor.TwoRegisterAddresses{
-            .oneAddress = processor.RegisterAddress{
-                .content = registerAddressNum,
-            },
-            .anotherAddress = processor.RegisterAddress{
-                .content = otherRegisterAddressNum,
-            },
-        } };
+        return null;
     }
-    return null;
+    const registerAddressNum = decodeFirstRegisterNumber(instruction);
+    const otherRegisterAddressNum = decodeSecondRegisterNumber(
+        instruction,
+    );
+    return Chip8Instruction{ .subtract = processor.TwoRegisterAddresses{
+        .oneAddress = processor.RegisterAddress{
+            .content = registerAddressNum,
+        },
+        .anotherAddress = processor.RegisterAddress{
+            .content = otherRegisterAddressNum,
+        },
+    } };
 }
 
 fn decodeIfReversedSubtract(instruction: Instruction) ?Chip8Instruction {
-    if (checkByOpcodeMask(
+    if (!checkByOpcodeMask(
         instruction,
         0x8007,
         0xF00F,
     )) {
-        const registerAddressNum = decodeFirstRegisterNumber(instruction);
-        const otherRegisterAddressNum = decodeSecondRegisterNumber(
-            instruction,
-        );
-        return Chip8Instruction{ .reversedSubtract = processor.TwoRegisterAddresses{
-            .oneAddress = processor.RegisterAddress{
-                .content = registerAddressNum,
-            },
-            .anotherAddress = processor.RegisterAddress{
-                .content = otherRegisterAddressNum,
-            },
-        } };
+        return null;
     }
-    return null;
+    const registerAddressNum = decodeFirstRegisterNumber(instruction);
+    const otherRegisterAddressNum = decodeSecondRegisterNumber(
+        instruction,
+    );
+    return Chip8Instruction{ .reversedSubtract = processor.TwoRegisterAddresses{
+        .oneAddress = processor.RegisterAddress{
+            .content = registerAddressNum,
+        },
+        .anotherAddress = processor.RegisterAddress{
+            .content = otherRegisterAddressNum,
+        },
+    } };
 }
 
 fn decodeIfClearScreen(instruction: Instruction) ?Chip8Instruction {
-    if (checkByOpcodeMask(
+    if (!checkByOpcodeMask(
         instruction,
         0x00E0,
         0xFFFF,
     )) {
-        return Chip8Opcode.clearScreen;
+        return null;
     }
-    return null;
+
+    return Chip8Opcode.clearScreen;
 }
 
 test "test decode ClearScreen" {
